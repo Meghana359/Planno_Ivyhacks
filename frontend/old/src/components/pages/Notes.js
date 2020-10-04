@@ -2,8 +2,8 @@ import React from 'react'
 
 export const Notes = () => {
     return (
-        <div>
+        <h2>
             Notes
-        </div>
+        </h2>
     )
 }

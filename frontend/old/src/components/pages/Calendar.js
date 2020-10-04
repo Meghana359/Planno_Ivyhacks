@@ -2,8 +2,6 @@ import React from 'react'
 
 export const Calendar = () => {
     return (
-        <div>
-            Calendar
-        </div>
+        <h2>Calendar </h2>
     )
 }

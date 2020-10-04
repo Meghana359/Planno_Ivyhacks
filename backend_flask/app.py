@@ -1,65 +1,45 @@
-from flask import Flask, request, render_template, url_for, redirect
-from flask_sqlalchemy import SQLAlchemy
-from datetime import datetime
+import os
+from flask import Flask, jsonify
+from backend_flask.config import config
+from backend_flask.models import db
+from backend_flask.blueprints import todos
+from backend_flask.utils import generate_response
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
-db = SQLAlchemy(app)
 
-class ToDo(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    content = db.Column(db.String(200),nullable=False)
-    completed = db.Column(db.Integer, default=0)
-    date_created = db.Column(db.DateTime,default=datetime.utcnow)
+env_config = os.getenv('FLASK_CONFIG', 'dev')
 
-    def __repr__(self):
-        return '<Task %r>' % self.id
-  
+app.config.from_object(config[env_config])
+db.init_app(app)
 
-@app.route('/todo', methods=['POST', 'GET'])
-def index():
-    if request.method == 'POST':
-        task_content = request.form['content']
-        new_task = ToDo(content=task_content)
+with app.app_context():
+    db.create_all()
 
-        try:
-            db.session.add(new_task)
-            db.session.commit()
-            return redirect('/')
-        except:
-            return 'OOPS!! THERE IS AN UNEXPECTED ERROR'  
 
-    else:
-         tasks = ToDo.query.order_by(ToDo.date_created).all()  
-         return render_template('index.html', tasks=tasks)
+@app.errorhandler(404)
+def not_found(e):
+    return generate_response(404, 'Resource not found.')
 
-@app.route('/delete/<int:id>')
-def delete(id):
-    task_to_delete = ToDo.query.get_or_404(id)
 
-    try:
-        db.session.delete(task_to_delete)
-        db.session.commit()
-        return redirect('/')
-    except:    
-        return 'OOPS!! THERE IS AN UNEXPECTED ERROR'    
+@app.errorhandler(400)
+def bad_request(e):
+    return generate_response(400, 'Bad request.')
 
-@app.route('/update/<int:id>', methods=['GET', 'POST'])
-def update(id):
-    task = ToDo.query.get_or_404(id)
 
-    if request.method == 'POST':
-        task.content = request.form['content']
+app.register_blueprint(todos)
 
-        try:
-            db.session.commit()
-            return redirect('/')
-        except:
-            return 'OOPS!! THERE IS AN UNEXPECTED ERROR'
-
-    else:
-        return render_template('update.html', task=task)        
-
+<<<<<<< HEAD
+if __name__ == '__main__':
+    app.run(host='0.0.0.0')
+||||||| merged common ancestors
 if __name__ == "__main__" :
     db.create_all()
     app.run(debug=True) 
+=======
+if __name__ == "__main__" :
+    db.create_all()
+    app.run(debug=True) 
+
+    i = 12
+    
+>>>>>>> 902d206914b30eb002027aca28300dd3c6dd8c5b
